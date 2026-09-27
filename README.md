@@ -16,6 +16,8 @@ Team project for the Amazon ML Challenge 2026 – Business Entity Resolution.
 - Achieved approximately **88% candidate recall** with the final blocking approach.
 - The generated candidate file is very large, so it cannot be conveniently opened/uploaded through GitHub.
 - Therefore, the **candidate-generation code** is included in `code/CandyGen/` so the file can be generated when required.
+- The generated candidate file is available here: https://drive.google.com/file/d/1qEDpOphU6L8GBz9QNIm4NO-6MvPROZPq/view?usp=sharing
+
 
 ## Entity Matching
 
