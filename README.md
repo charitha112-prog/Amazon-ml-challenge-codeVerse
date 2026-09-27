@@ -1,9 +1,6 @@
 # Amazon-ml-challenge-codeVerse
 Team project for the Amazon ML Challenge 2026 – Business Entity Resolution.
 
-# Amazon ML Challenge 2026
-## Business Entity Resolution
-
 ## Project Steps
 
 1. Data Understanding & Preprocessing
