@@ -1,0 +1,29 @@
+REQUIRED PYTHON PACKAGES
+========================
+
+duckdb==1.5.5
+numpy==2.5.3
+rapidfuzz==3.14.6
+
+
+PURPOSE
+=======
+
+DuckDB:
+Used for fast SQL-based processing and candidate generation on the
+large Source 1, Source 2, and Source 3 datasets.
+
+NumPy:
+Used for numerical and data-processing operations in the Python
+environment.
+
+RapidFuzz:
+Provides fast fuzzy string-matching functionality for comparing
+business names and addresses in the entity-resolution pipeline.
+
+
+PYTHON VERSION
+==============
+
+Python 3.10 or newer
+Tested with Python 3.14.6.
