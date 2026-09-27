@@ -1,3 +1,4 @@
+import argparse
 import duckdb
 import os
 import time
@@ -5,25 +6,57 @@ import time
 # ============================================================
 # AMAZON ML CHALLENGE 2026
 # PRODUCTION CANDIDATE GENERATION
-#
-# Based exactly on the validated:
-# V3 + ADDRESS TOKENS blocking strategy
 # ============================================================
 
-SOURCE1 = "dataset/test/test_source1.tsv"
-SOURCE2 = "dataset/test/test_source2.tsv"
-SOURCE3 = "dataset/test/test_source3.tsv"
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "--split",
+    choices=["train", "test"],
+    default="test",
+    help="Which split to generate candidates for. 'train' also lets "
+         "you self-score against train_ground_truth.tsv; 'test' is "
+         "what gets submitted to the leaderboard.",
+)
+parser.add_argument(
+    "--data-dir",
+    default="dataset",
+    help="Root dataset directory containing train/ and test/ subfolders.",
+)
+parser.add_argument(
+    "--output-dir",
+    default="output",
+    help="Where to write candidate_pairs.tsv (or "
+         "candidate_pairs_<split>.tsv when --split train, so it never "
+         "collides with the test file used for submission).",
+)
+parser.add_argument(
+    "--chunk-size",
+    type=int,
+    default=50000,
+)
+args = parser.parse_args()
 
-OUTPUT_DIR = "output"
-OUTPUT_FILE = os.path.join(OUTPUT_DIR, "candidate_pairs.tsv")
+SOURCE1 = os.path.join(args.data_dir, args.split, f"{args.split}_source1.tsv")
+SOURCE2 = os.path.join(args.data_dir, args.split, f"{args.split}_source2.tsv")
+SOURCE3 = os.path.join(args.data_dir, args.split, f"{args.split}_source3.tsv")
 
-CHUNK_SIZE = 50000
+OUTPUT_DIR = args.output_dir
+# Keep the test-split output name exactly as before (candidate_pairs.tsv,
+# what the validator and submission package expect); give the train-split
+# run a distinct name so the two never overwrite each other.
+OUTPUT_FILENAME = (
+    "candidate_pairs.tsv" if args.split == "test" else "candidate_pairs_train.tsv"
+)
+OUTPUT_FILE = os.path.join(OUTPUT_DIR, OUTPUT_FILENAME)
+
+CHUNK_SIZE = args.chunk_size
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 print("==============================================")
 print("PRODUCTION CANDIDATE GENERATION")
 print("V3 + ADDRESS TOKENS")
+print(f"SPLIT: {args.split}")
 print("==============================================")
 print()
 
@@ -36,9 +69,9 @@ con.execute("PRAGMA threads=2")
 # STEP 1: LOAD SOURCE 1
 # ============================================================
 
-print("Loading test Source 1...")
+print(f"Loading {args.split} Source 1...")
 
-con.execute("""
+con.execute(f"""
 CREATE OR REPLACE TEMP TABLE source1_all AS
 SELECT
     row_number() OVER () AS rn,
@@ -64,7 +97,7 @@ SELECT
     ) AS norm_address
 
 FROM read_csv(
-    'dataset/test/test_source1.tsv',
+    '{SOURCE1}',
     delim='\t',
     header=true
 )
@@ -81,9 +114,9 @@ print()
 # STEP 2: LOAD SOURCE 2 + SOURCE 3
 # ============================================================
 
-print("Loading test Source 2 and Source 3...")
+print(f"Loading {args.split} Source 2 and Source 3...")
 
-con.execute("""
+con.execute(f"""
 CREATE OR REPLACE TEMP TABLE candidates AS
 
 SELECT
@@ -109,7 +142,7 @@ SELECT
     ) AS norm_address
 
 FROM read_csv(
-    'dataset/test/test_source2.tsv',
+    '{SOURCE2}',
     delim='\t',
     header=true
 )
@@ -139,7 +172,7 @@ SELECT
     ) AS norm_address
 
 FROM read_csv(
-    'dataset/test/test_source3.tsv',
+    '{SOURCE3}',
     delim='\t',
     header=true
 )
@@ -645,5 +678,5 @@ elapsed = (time.time() - start_time) / 60
 
 print("Total time:", round(elapsed, 2), "minutes")
 print()
-print("YOUR BLOCKING PART IS DONE.")
+print(f"YOUR BLOCKING PART IS DONE ({args.split.upper()} SPLIT).")
 print("==============================================")
